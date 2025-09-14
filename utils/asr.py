@@ -1,0 +1,30 @@
+import os
+from faster_whisper import WhisperModel
+
+
+from pydub import AudioSegment
+
+DEFAULT_MODEL = os.environ.get('WHISPER_MODEL', 'small')
+
+class Transcriber:
+    def __init__(self, model_size=DEFAULT_MODEL, compute_type='int8', device='cpu'):
+        # device='cpu' or 'cuda' or 'auto'; compute_type='int8' helps on CPU
+        self.model = WhisperModel(model_size, device=device, compute_type=compute_type)
+
+    def load_audio(self, path):
+        # convert to mono 16k wav for stability
+        audio = AudioSegment.from_file(path)
+        wav_path = path + '.wav'
+        audio = audio.set_frame_rate(16000).set_channels(1)
+        audio.export(wav_path, format='wav')
+        return wav_path
+
+    def transcribe(self, path):
+        wav = self.load_audio(path)
+        segments, info = self.model.transcribe(wav, vad_filter=True)
+        segs = []
+        text_parts = []
+        for s in segments:
+            segs.append({'start': s.start, 'end': s.end, 'text': s.text.strip()})
+            text_parts.append(s.text.strip())
+        return {'language': info.language, 'segments': segs, 'text': ' '.join(text_parts)}

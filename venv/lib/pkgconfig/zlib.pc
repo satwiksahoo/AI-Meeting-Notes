@@ -1,0 +1,13 @@
+prefix=/Users/satwiksahoo/Downloads/ai-meeting-notes/venv
+exec_prefix=/Users/satwiksahoo/Downloads/ai-meeting-notes/venv
+libdir=/Users/satwiksahoo/Downloads/ai-meeting-notes/venv/lib
+sharedlibdir=/Users/satwiksahoo/Downloads/ai-meeting-notes/venv/lib
+includedir=/Users/satwiksahoo/Downloads/ai-meeting-notes/venv/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
