@@ -1,0 +1,9 @@
+pkg-config
+ffmpeg
+libavformat-dev
+libavdevice-dev
+libavfilter-dev
+libavcodec-dev
+libswscale-dev
+libswresample-dev
+libavutil-dev
