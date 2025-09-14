@@ -6,10 +6,20 @@ from chromadb.config import Settings
 EMB_NAME = os.environ.get('EMB_MODEL', 'all-MiniLM-L6-v2')
 
 class RAGIndex:
+    # def __init__(self, persist_dir='rag_index'):
+    #     self.client = chromadb.Client(Settings(persist_directory=persist_dir, anonymized_telemetry=False))
+    #     # collection will be created if missing
+    #     self.collection = self.client.get_or_create_collection(name='knowledge_base')  ##
+    #     self.emb = SentenceTransformer(EMB_NAME)
+        
     def __init__(self, persist_dir='rag_index'):
-        self.client = chromadb.Client(Settings(persist_directory=persist_dir, anonymized_telemetry=False))
+        self.client = chromadb.Client(Settings(
+            chroma_db_impl="duckdb+parquet",
+            persist_directory=None,        # in-memory mode (no writes to read-only FS)
+            anonymized_telemetry=False
+        ))
         # collection will be created if missing
-        self.collection = self.client.get_or_create_collection(name='knowledge_base')  ##
+        self.collection = self.client.get_or_create_collection(name='knowledge_base')
         self.emb = SentenceTransformer(EMB_NAME)
 
     def index_folder(self, folder='knowledge_base'): ##
