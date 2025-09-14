@@ -17,4 +17,4 @@ yagmail==0.15.293
 # faster-whisper
 groq
 reportlab
-av==10.0.0
+av>=11.0,<13
