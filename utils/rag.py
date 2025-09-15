@@ -16,11 +16,15 @@ class RAGIndex:
     #     self.emb = SentenceTransformer(EMB_NAME)
         
     def __init__(self, persist_dir='rag_index'):
+        # self.client = chromadb.Client(Settings(
+        #     chroma_db_impl="duckdb+parquet",
+        #     persist_directory=None,        # in-memory mode (no writes to read-only FS)
+        #     anonymized_telemetry=False
+        # ))
         self.client = chromadb.Client(Settings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory=None,        # in-memory mode (no writes to read-only FS)
-            anonymized_telemetry=False
-        ))
+    chroma_db_impl="duckdb+parquet",
+    persist_directory="/mount/tmp/rag_index"
+))
         # collection will be created if missing
         self.collection = self.client.get_or_create_collection(name='knowledge_base')
         self.emb = SentenceTransformer(EMB_NAME)
