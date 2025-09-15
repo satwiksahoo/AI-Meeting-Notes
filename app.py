@@ -255,12 +255,18 @@
 
 
 import os, json
+import os
+os.environ["STREAMLIT_WATCHDOG"] = "false"
 import streamlit as st
 from utils.asr import Transcriber
 from utils.rag import RAGIndex
 from utils.summarize import summarize_text
 from utils.emailer import send_summary
 from utils.pdf_exporter import create_summary_pdf
+
+import warnings
+warnings.filterwarnings("ignore", message="Tried to instantiate class '__path__._path'")
+
 
 st.set_page_config(page_title='AI Meeting Notes', layout='wide')
 st.title('🎧 AI Meeting Notes & Action Items Generator')
