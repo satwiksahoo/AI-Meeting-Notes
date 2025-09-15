@@ -310,16 +310,10 @@ if uploaded:
     st.subheader('1) Transcription')
     
     if "transcript" not in st.session_state:    
-        # with st.spinner('Transcribing with Whisper…'):
-        #     transcriber = get_transcriber(whisper_size)
-        #     out = transcriber.transcribe(path)
-        #     st.session_state["transcript"] = out
-        transcriber = get_transcriber(whisper_size)
-        with st.spinner(f"Processing audio... This may take a few minutes for long files."):
-            # Optional: split audio into chunks (if your Transcriber supports it)
-            out = transcriber.transcribe(path, chunk_ms=60_000)  # 1 min chunks
-        st.session_state["transcript"] = out
-
+        with st.spinner('Transcribing with Whisper…'):
+            transcriber = get_transcriber(whisper_size)
+            out = transcriber.transcribe(path)
+            st.session_state["transcript"] = out
     else:
         out = st.session_state["transcript"]
     
@@ -332,13 +326,8 @@ if uploaded:
     st.subheader('2) Retrieve KB context (RAG)')
 
     if "rag_hits" not in st.session_state:
-        # rag = get_rag()
-        # st.session_state["rag_hits"] = rag.query(out.get('text', ''), k=4)
         rag = get_rag()
-        with st.spinner("Indexing knowledge base..."):
-            rag.index_folder("knowledge_base")  # Only needed if you want to re-index
         st.session_state["rag_hits"] = rag.query(out.get('text', ''), k=4)
-
 
     hits = st.session_state["rag_hits"]
 
