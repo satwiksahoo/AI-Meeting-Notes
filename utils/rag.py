@@ -76,7 +76,7 @@ class RAGIndex:
     def __init__(self, persist_dir="/mount/tmp/rag_index"):
         # ✅ New API (Chroma >=0.5)
         self.client = chromadb.PersistentClient(path=persist_dir)
-        self.client.reset()    # newly added 
+        # self.client.reset()    # newly added 
 
         # ✅ Collection auto-creates if missing
         self.collection = self.client.get_or_create_collection("knowledge_base")
