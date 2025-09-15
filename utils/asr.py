@@ -18,13 +18,35 @@ class Transcriber:
         audio = audio.set_frame_rate(16000).set_channels(1)
         audio.export(wav_path, format='wav')
         return wav_path
+    
+    def split_audio(self, file_path, chunk_ms=30_000):  # 30s chunks
+        audio = AudioSegment.from_file(file_path)
+        return [audio[i:i+chunk_ms] for i in range(0, len(audio), chunk_ms)]
 
+
+    # def transcribe(self, path):
+    #     wav = self.load_audio(path)
+    #     segments, info = self.model.transcribe(wav, vad_filter=True)
+    #     segs = []
+    #     text_parts = []
+    #     for s in segments:
+    #         segs.append({'start': s.start, 'end': s.end, 'text': s.text.strip()})
+    #         text_parts.append(s.text.strip())
+    #     return {'language': info.language, 'segments': segs, 'text': ' '.join(text_parts)}
+    
     def transcribe(self, path):
-        wav = self.load_audio(path)
-        segments, info = self.model.transcribe(wav, vad_filter=True)
-        segs = []
-        text_parts = []
-        for s in segments:
-            segs.append({'start': s.start, 'end': s.end, 'text': s.text.strip()})
-            text_parts.append(s.text.strip())
-        return {'language': info.language, 'segments': segs, 'text': ' '.join(text_parts)}
+        chunks = self.split_audio(path)
+        all_text, all_segments = [], []
+        
+        for idx, chunk in enumerate(chunks):
+            tmp_path = f"/mount/tmp/chunk_{idx}.wav"
+            chunk.export(tmp_path, format="wav")
+
+            segments, info = self.model.transcribe(tmp_path, vad_filter=True)
+            for s in segments:
+                all_segments.append({'start': s.start, 'end': s.end, 'text': s.text.strip()})
+                all_text.append(s.text.strip())
+
+            os.remove(tmp_path)
+
+        return {'language': info.language, 'segments': all_segments, 'text': ' '.join(all_text)}
