@@ -81,35 +81,71 @@ class RAGIndex:
         # ✅ Collection auto-creates if missing
         self.collection = self.client.get_or_create_collection("knowledge_base")
         self.emb = SentenceTransformer(EMB_NAME)
-
-    def index_folder(self, folder="knowledge_base" ,chunk_size=500):
+        
+    def index_folder(self, folder="knowledge_base", chunk_size=500):
         docs, metadatas, ids = [], [], []
-        for i, path in enumerate(sorted(glob.glob(os.path.join(folder, "**", "*"), recursive=True))):
+        i = 0
+
+        for path in sorted(glob.glob(os.path.join(folder, "**", "*"), recursive=True)):
             if os.path.isdir(path) or not any(path.lower().endswith(ext) for ext in [".md", ".txt"]):
                 continue
+
             try:
                 with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                    text = f.read().strip()
-                if not text:
-                    continue
-                
-                for j in range(0, len(text), chunk_size):
-                    chunk = text[j:j+chunk_size]
-                    docs.append(chunk)
-                    metadatas.append({"source": os.path.basename(path)})
-                    ids.append(f"doc_{i}_{j}")
-                # docs.append(text)
-                # metadatas.append({"source": os.path.basename(path)})
-                # ids.append(f"doc_{i}")
+                    while True:
+                        text = f.read(5000)  # read in small batches instead of entire file
+                        if not text:
+                            break
+
+                        for j in range(0, len(text), chunk_size):
+                            chunk = text[j:j+chunk_size]
+                            docs.append(chunk)
+                            metadatas.append({"source": os.path.basename(path)})
+                            ids.append(f"doc_{i}_{j}")
+                i += 1
             except Exception:
                 continue
 
+            # flush every 1000 chunks to avoid memory spikes
+            if len(docs) >= 1000:
+                embs = self.emb.encode(docs).tolist()
+                self.collection.upsert(documents=docs, metadatas=metadatas, ids=ids, embeddings=embs)
+                docs, metadatas, ids = [], [], []
+
+        # final flush
         if docs:
             embs = self.emb.encode(docs).tolist()
-            self.collection.upsert(
-                documents=docs, metadatas=metadatas, ids=ids, embeddings=embs
-            )
+            self.collection.upsert(documents=docs, metadatas=metadatas, ids=ids, embeddings=embs)
 
+
+    # def index_folder(self, folder="knowledge_base" ,chunk_size=500):
+    #     docs, metadatas, ids = [], [], []
+    #     for i, path in enumerate(sorted(glob.glob(os.path.join(folder, "**", "*"), recursive=True))):
+    #         if os.path.isdir(path) or not any(path.lower().endswith(ext) for ext in [".md", ".txt"]):
+    #             continue
+    #         try:
+    #             with open(path, "r", encoding="utf-8", errors="ignore") as f:
+    #                 text = f.read().strip()
+    #             if not text:
+    #                 continue
+                
+    #             for j in range(0, len(text), chunk_size):
+    #                 chunk = text[j:j+chunk_size]
+    #                 docs.append(chunk)
+    #                 metadatas.append({"source": os.path.basename(path)})
+    #                 ids.append(f"doc_{i}_{j}")
+    #             # docs.append(text)
+    #             # metadatas.append({"source": os.path.basename(path)})
+    #             # ids.append(f"doc_{i}")
+    #         except Exception:
+    #             continue
+
+    #     if docs:
+    #         embs = self.emb.encode(docs).tolist()
+    #         self.collection.upsert(
+    #             documents=docs, metadatas=metadatas, ids=ids, embeddings=embs
+    #         )
+    
     def query(self, query_text, k=4):
         if not query_text:
             return []
