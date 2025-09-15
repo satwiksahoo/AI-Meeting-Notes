@@ -1,3 +1,6 @@
+import sys
+__import__("pysqlite3")
+sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 import os, glob
 from sentence_transformers import SentenceTransformer
 import chromadb

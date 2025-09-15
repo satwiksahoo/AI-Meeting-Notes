@@ -18,3 +18,4 @@ yagmail==0.15.293
 groq
 reportlab
 av>=11.0,<13
+pysqlite3-binary
