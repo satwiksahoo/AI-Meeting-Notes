@@ -2,7 +2,8 @@ streamlit==1.37.1
 faster-whisper==1.0.3
 torch>=2.1
 sentence-transformers==3.0.1
-chromadb==0.4.15
+# chromadb==0.4.15
+chromadb>=0.5.0,<0.6.0
 pydub==0.25.1
 soundfile==0.12.1
 webrtcvad==2.0.10
